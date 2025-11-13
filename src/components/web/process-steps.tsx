@@ -23,27 +23,34 @@ export default function ProcessSteps() {
   ]
 
   return (
-    <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
-      <div className="max-w-6xl mx-auto py-[80px]">
+    <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white mx-4 md:mx-3 rounded-[32px] !mt-[120px] ">
+      <div className=" container mx-auto py-[80px]">
         <div className="text-center mb-12">
-          <p className="text-cyan-400 text-sm font-semibold mb-2">working process</p>
+          <p className="bg-text-gradient bg-clip-text text-transparent text-xl font-midium mb-2">
+            working process
+          </p>
+
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[#000000]">
-          Simple easy steps to get started
+            Simple easy steps to get started
           </h2>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
-          {steps.map((step) => (
+        <div className="grid md:grid-cols-3 gap-8 pt-[50px]">
+          {steps.map((step, index) => (
             <div
               key={step.number}
-              className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-lg p-6 border border-slate-700 hover:border-cyan-400 transition"
+              className={` p-6 transition
+        ${index < 2 ? " lg:border-r border-gray-300" : ""}`}
             >
-              <h3 className="text-xl font-bold mb-2">{step.title}</h3>
-              <p className="text-gray-400 text-sm mb-4">{step.description}</p>
-              <p className="text-4xl font-bold text-cyan-400">{step.number}</p>
+              <h3 className="text-xl font-bold text-[#000000] mb-2">{step.title}</h3>
+              <p className="text-[#595959] text-base font-normal leading-[150%] mb-4">
+                {step.description}
+              </p>
+              <p className="text-4xl font-bold text-[#B6E9E3]">{step.number}</p>
             </div>
           ))}
         </div>
+
       </div>
     </section>
   )

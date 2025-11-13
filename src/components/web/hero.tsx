@@ -14,50 +14,59 @@ export default function Hero() {
     <section className="relative bg-cover bg-center">
       {/* Background Image */}
       <div
-        className="h-[822px] flex items-center justify-center" // centers content
+        className="h-[822px] flex items-end justify-center"
         style={{
           backgroundImage: "url(/assets/herobg.png)",
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
       >
-        {/* Main Centered Content */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-2 gap-8 items-center">
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 pb-10">
+          {/* Responsive Flex Container */}
+          <div className="flex flex-col lg:flex-row lg:justify-between gap-10">
             {/* Left Content */}
-            <div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-6 text-white">
+            <div className="flex-1 flex flex-col justify-start lg:justify-between">
+              <h1 className="text-[28px] md:text-[40px] lg:text-[60px] font-extrabold mb-3 md:mb-6 text-white leading-[150%]">
                 Fast, Fair Cash Offers for Your Property
               </h1>
-              <div className="flex gap-4">
-                <Button className="bg-cyan-500 hover:bg-cyan-600 text-white">
+
+              <div className="flex flex-col sm:flex-row sm:gap-4 mt-6 lg:mt-0">
+                <Button className="bg-gradient hover:bg-gradient/80 h-10 md:h-[56px] px-[53px] text-white text-base md:text-[18px] font-semibold mb-4 sm:mb-0">
                   I need a space
                 </Button>
-                <Button variant="outline" className="bg-white text-slate-950 hover:bg-gray-100 border-0">
-                  I have a property
+                <Button className="bg-white hover:bg-white h-10 md:h-[56px] py-3 md:py-3 rounded-lg border border-gray-200 px-[53px] text-white text-base md:text-[18px] font-semibold">
+                  <span className="bg-text-gradient bg-clip-text text-transparent font-semibold">
+                    I have a property
+                  </span>
                 </Button>
               </div>
             </div>
 
             {/* Right Search Form */}
-            <div className="bg-white rounded-lg p-6 space-y-4 shadow-lg">
-              <h3 className="text-xl font-bold text-slate-950">Search properties</h3>
+            <div className="flex-1 max-w-full lg:max-w-[527px] bg-white rounded-lg p-6 space-y-4 shadow-lg">
+              <h3 className="text-[26px] md:text-[32px] font-semibold text-[#000000]">
+                Search properties
+              </h3>
 
               <div>
-                <label className="text-sm text-slate-600 block mb-1">Search for properties</label>
+                <label className="text-base text-[#000000] block mb-1">
+                  Search for properties
+                </label>
                 <Input
                   placeholder="Search..."
-                  className="bg-gray-50 border-gray-200 text-slate-950 placeholder:text-gray-400"
+                  className="border-[#BFBFBF] placeholder:text-[#595959] text-[#595959] h-[48px] rounded-[8px]"
                 />
               </div>
 
               <div>
-                <label className="text-sm text-slate-600 block mb-1">Location</label>
+                <label className="text-base text-[#000000] block mb-1">
+                  Location
+                </label>
                 <div className="relative">
                   <select
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded text-slate-950 appearance-none"
+                    className="w-full border border-[#BFBFBF] bg-white text-[#595959] h-[48px] rounded-[8px] px-3 appearance-none"
                   >
                     <option value="">Location</option>
                     <option value="cbd">CBD</option>
@@ -71,12 +80,14 @@ export default function Hero() {
               </div>
 
               <div>
-                <label className="text-sm text-slate-600 block mb-1">Type</label>
+                <label className="text-base text-[#000000] block mb-1">
+                  Type
+                </label>
                 <div className="relative">
                   <select
                     value={type}
                     onChange={(e) => setType(e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded text-slate-950 appearance-none"
+                    className="w-full border border-[#BFBFBF] bg-white text-[#595959] h-[48px] rounded-[8px] px-3 appearance-none"
                   >
                     <option value="">Type</option>
                     <option value="commercial">Commercial</option>
@@ -90,14 +101,14 @@ export default function Hero() {
               </div>
 
               <div>
-                <label className="text-sm text-slate-600 block mb-1">Size</label>
+                <label className="text-base text-[#000000] block mb-1">Size</label>
                 <Input
                   placeholder="sqm"
-                  className="bg-gray-50 border-gray-200 text-slate-950 placeholder:text-gray-400"
+                  className="border-[#BFBFBF] placeholder:text-[#595959] text-[#595959] h-[48px] rounded-[8px]"
                 />
               </div>
 
-              <Button className="w-full bg-cyan-500 hover:bg-cyan-600 text-white">
+              <Button className="w-full bg-gradient hover:bg-gradient/92 h-[49px] text-white">
                 Search Properties
               </Button>
             </div>

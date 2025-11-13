@@ -38,7 +38,7 @@ export default function RegisterPage({ onSwitchToLogin }: RegisterPageProps) {
     
       imagePosition="left"
     >
-      <div className="bg-[#FFFFFF33]/20 w-full   lg:w-[500px] py-5 rounded-xl p-8 space-y-6">
+      <div className="bg-[#FFFFFF33]/20 w-full   lg:w-[500px] py-5 rounded-xl p-4 md:p-8 space-y-6">
         {currentStep === "signup" && <RegistrationForm onSubmit={handleSignupSubmit} onLoginClick={onSwitchToLogin} />}
 
         {currentStep === "supplier-step2" && (

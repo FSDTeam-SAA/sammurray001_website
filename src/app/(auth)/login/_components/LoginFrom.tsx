@@ -15,38 +15,38 @@ export default function LoginPage({ onSwitchToRegister, onSwitchToForgotPassword
   const [rememberMe, setRememberMe] = useState(false)
 
   return (
-    <AuthLayout
-
-      imagePosition="right"
-    >
-      <div className="bg-[#FFFFFF33]/20 rounded-xl p-8 space-y-6 w-full lg:w-[500px]">
+    <AuthLayout imagePosition="right">
+      <div className="bg-[#FFFFFF33]/20 rounded-xl px-3 lg:p-8 space-y-6 w-full lg:w-[550px]">
+        {/* Header */}
         <div>
-          <h2
-            className="text-[40px] font-bold mb-2 bg-gradient-to-r from-[#0078B8] to-[#229F99] text-transparent bg-clip-text"
-          >
+          <h2 className="text-[25px] lg:text-[40px] font-bold mb-2 bg-gradient-to-r from-[#0078B8] to-[#229F99] text-transparent bg-clip-text">
             Hello, Welcome!
           </h2>
-
-          <p className="text-[#FFFFFF] text-base">Please Enter Your Details Below to Continue</p>
+          <p className="text-[#FFFFFF] text-sm lg:text-base">
+            Please enter your details below to continue
+          </p>
         </div>
 
+        {/* Form */}
         <form className="space-y-4">
+          {/* Email */}
           <div>
-            <label className="block text-[#FFFFFF] text-base mb-2">Email Address</label>
+            <label className="block text-[#FFFFFF] text-sm lg:text-base mb-2">Email Address</label>
             <Input
               type="email"
               placeholder="hello@example.com"
-              className=" border-[#BFBFBF] text-white placeholder:text-[#BFBFBF] h-[51px] rounded-[4px]"
+              className="border-[#BFBFBF] text-white placeholder:text-[#BFBFBF] h-[35px] lg:h-[51px] rounded-[4px]"
             />
           </div>
 
+          {/* Password */}
           <div>
-            <label className="block text-[#FFFFFF] text-base mb-2">Password</label>
+            <label className="block text-[#FFFFFF] text-sm lg:text-base mb-2">Password</label>
             <div className="relative">
               <Input
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
-                className="border-[#BFBFBF] text-white placeholder:text-[#BFBFBF] h-[51px] rounded-[4px] pr-10"
+                className="border-[#BFBFBF] text-white placeholder:text-[#BFBFBF] h-[35px] lg:h-[51px] rounded-[4px] pr-10"
               />
               <button
                 type="button"
@@ -58,46 +58,52 @@ export default function LoginPage({ onSwitchToRegister, onSwitchToForgotPassword
             </div>
           </div>
 
+          {/* Remember & Forgot */}
           <div className="flex items-center justify-between">
-           <div>
-             <input
-              type="checkbox"
-              id="remember"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-              className="w-4 h-4 bg-[#2c3d5c] border-gray-600 rounded"
-            />
-            <label htmlFor="remember" className="ml-2 text-[#BFBFBF] text-sm cursor-pointer">
+            <label htmlFor="remember" className="flex items-center text-[#BFBFBF] text-xs lg:text-sm cursor-pointer">
+              <input
+                type="checkbox"
+                id="remember"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="w-4 h-4 bg-[#2c3d5c] border-gray-600 rounded mr-2"
+              />
               Remember me now
             </label>
-           </div>
-            <div>
-              <button
-                type="button"
-                onClick={onSwitchToForgotPassword}
-                className="w-full bg-gradient-to-r from-[#0078B8] to-[#229F99] text-transparent bg-clip-text  text-sm font-semibold py-2"
-              >
-                Forgot Password?
-              </button>
-            </div>
+
+            <button
+              type="button"
+              onClick={onSwitchToForgotPassword}
+              className="bg-gradient-to-r from-[#0078B8] to-[#229F99] text-transparent bg-clip-text text-xs lg:text-sm font-semibold"
+            >
+              Forgot Password?
+            </button>
           </div>
 
+          {/* Submit */}
           <Button
             type="submit"
-            className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-semibold py-2 rounded-lg"
+            className="w-full h-[35px] lg:h-[51px] text-white font-semibold rounded-lg text-sm lg:text-base"
+            style={{
+              background: `linear-gradient(90deg, #0078B8 0%, #229F99 101.35%), 
+                           linear-gradient(338.72deg, rgba(0,118,180,0.2) 14.2%, rgba(51,164,150,0.2) 83.33%)`,
+              backgroundBlendMode: "overlay",
+            }}
           >
             Log In
           </Button>
         </form>
 
-        <div className="text-center text-sm text-gray-300">
-          Don`&apos;t have an account?{" "}
-          <button onClick={onSwitchToRegister} className="text-cyan-400 hover:text-cyan-300 font-semibold">
+        {/* Footer */}
+        <div className="text-center text-xs lg:text-sm text-gray-300 pb-4">
+          Don’t have an account?{" "}
+          <button
+            onClick={onSwitchToRegister}
+            className="text-cyan-400 hover:text-cyan-300 font-semibold"
+          >
             Sign Up
           </button>
         </div>
-
-
       </div>
     </AuthLayout>
   )

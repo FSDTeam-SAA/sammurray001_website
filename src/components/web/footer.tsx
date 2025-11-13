@@ -2,104 +2,119 @@
 
 import { Button } from "@/components/ui/button"
 import { Facebook, Instagram, Dribbble } from "lucide-react"
+import Image from "next/image"
 
 export default function Footer() {
   return (
-    <footer className="bg-slate-950 border-t border-slate-800">
+    <div className="bg-white  mx-2 md:mx-2 rounded-tl-[32px] rounded-tr-[32px]  ">
+
+    <footer className="">
       {/* Chat CTA Section */}
-      <div className="bg-gradient-to-r from-white to-gray-100 rounded-3xl mx-4 md:mx-8 my-16 p-8 md:p-12">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+      <div className="container mx-auto px-4 py-12 md:py-20">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-6 md:gap-12 text-center md:text-left">
           <div>
-            <h3 className="text-2xl md:text-3xl font-bold text-slate-950 mb-2">
-              Let's chat about your <span className="text-cyan-500">dreams and goals.</span>
-            </h3>
+            <h1 className="text-2xl md:text-[42px] font-bold text-[#000000] mb-3 md:mb-4">
+              Let's chat about your
+            </h1>
+            <h1 className="bg-text-gradient bg-clip-text text-transparent text-2xl md:text-[48px] font-bold leading-tight md:leading-[1.2]">
+              dreams and goals.
+            </h1>
           </div>
-          <Button className="bg-cyan-500 hover:bg-cyan-600 text-white whitespace-nowrap">Let's talk →</Button>
+
+          <Button className="bg-gradient hover:bg-gradient/95 h-[48px] md:h-[56px] px-8 md:px-[50px] text-white text-sm md:text-base">
+            Let's talk →
+          </Button>
         </div>
       </div>
 
       {/* Footer Content */}
-      <div className="bg-slate-900 rounded-3xl rounded-b-none mx-4 md:mx-8 p-8 md:p-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-          {/* Brand */}
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <span className="text-xl font-bold text-white">Property</span>
-              <span className="text-xl font-bold text-cyan-400">Nexus</span>
+      <div className="bg-[#070E28] rounded-t-[32px] md:rounded-t-[40px] px-4 sm:px-6 md:px-8 lg:px-12 py-10 md:py-16 mx-1 md:mx-3">
+        <div className="container mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-12 mb-10">
+            {/* Brand */}
+            <div>
+              <Image
+                src="/assets/logo.jpg"
+                alt="Logo"
+                width={150}
+                height={40}
+                className="w-[150px] h-[40px] object-cover mb-4"
+              />
+              <p className="text-gray-400 text-sm md:text-base leading-relaxed mb-4">
+                A smart platform connecting businesses looking for space with developers and property owners.
+              </p>
+              <p className="text-gray-400 text-sm md:text-base leading-relaxed">
+                Discover, list, and match spaces with clarity, privacy, and simplicity.
+              </p>
             </div>
-            <p className="text-gray-400 text-sm mb-4">
-              A smart platform connecting businesses looking for space with developers and property owners.
-            </p>
-            <p className="text-gray-500 text-xs">
-              Discover, list, and match spaces with clarity, privacy, and simplicity.
-            </p>
-          </div>
 
-          {/* Quick Links */}
-          <div>
-            <h4 className="font-semibold text-white mb-4">Quick Links</h4>
-            <nav className="space-y-2">
-              <a href="#" className="text-gray-400 text-sm hover:text-white transition block">
-                Home
-              </a>
-              <a href="#" className="text-gray-400 text-sm hover:text-white transition block">
-                Find Space
-              </a>
-              <a href="#" className="text-gray-400 text-sm hover:text-white transition block">
-                Find Tenants
-              </a>
-              <a href="#" className="text-gray-400 text-sm hover:text-white transition block">
-                List Space
-              </a>
-              <a href="#" className="text-gray-400 text-sm hover:text-white transition block">
-                Map
-              </a>
-              <a href="#" className="text-gray-400 text-sm hover:text-white transition block">
-                About Us
-              </a>
-              <a href="#" className="text-gray-400 text-sm hover:text-white transition block">
-                Terms & Conditions
-              </a>
-              <a href="#" className="text-gray-400 text-sm hover:text-white transition block">
-                Privacy Policy
-              </a>
-            </nav>
-          </div>
-
-          {/* Social & Contact */}
-          <div>
-            <h4 className="font-semibold text-white mb-4">Social media icons</h4>
-            <div className="flex gap-3 mb-6">
-              <button className="w-10 h-10 rounded-full bg-cyan-500 flex items-center justify-center hover:bg-cyan-600 transition text-white">
-                <Facebook size={18} />
-              </button>
-              <button className="w-10 h-10 rounded-full bg-cyan-500 flex items-center justify-center hover:bg-cyan-600 transition text-white">
-                <Instagram size={18} />
-              </button>
-              <button className="w-10 h-10 rounded-full bg-cyan-500 flex items-center justify-center hover:bg-cyan-600 transition text-white">
-                <Dribbble size={18} />
-              </button>
+            {/* Quick Links */}
+            <div>
+              <h4 className="font-semibold text-lg md:text-xl text-white mb-4">Quick Links</h4>
+              <nav className="grid grid-cols-2 md:grid-cols-1 gap-2">
+                {[
+                  "Home",
+                  "Find Space",
+                  "Find Tenants",
+                  "List Space",
+                  "Map",
+                  "About Us",
+                  "Terms & Conditions",
+                  "Privacy Policy",
+                ].map((link) => (
+                  <a
+                    key={link}
+                    href="#"
+                    className="text-[#C5C5C5] text-sm md:text-[17px] hover:text-cyan-400 transition block"
+                  >
+                    {link}
+                  </a>
+                ))}
+              </nav>
             </div>
-            <p className="text-gray-400 text-sm mb-2">For inquiries :</p>
-            <a href="mailto:hello@propertynexus.io" className="text-cyan-400 text-sm hover:text-cyan-300 transition">
-              hello@propertynexus.io
-            </a>
+
+            {/* Social & Contact */}
+            <div>
+              <h4 className="font-semibold text-lg md:text-xl text-white mb-4">Follow Us</h4>
+              <div className="flex gap-3 mb-6 justify-center md:justify-start">
+                {[Facebook, Instagram, Dribbble].map((Icon, i) => (
+                  <button
+                    key={i}
+                    className="w-10 h-10 rounded-full bg-cyan-500 flex items-center justify-center hover:bg-cyan-600 transition text-white"
+                  >
+                    <Icon size={18} />
+                  </button>
+                ))}
+              </div>
+              <p className="text-[#C5C5C5] text-sm md:text-base font-medium mb-1 text-center md:text-left">
+                For inquiries:
+              </p>
+              <a
+                href="mailto:hello@propertynexus.io"
+                className="text-cyan-400 text-sm md:text-base hover:text-cyan-300 transition block text-center md:text-left"
+              >
+                hello@propertynexus.io
+              </a>
+            </div>
           </div>
-        </div>
 
-        {/* Cookie Banner */}
-        <div className="bg-slate-800 border border-slate-700 rounded-lg p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <p className="text-gray-400 text-sm">
-            Property Nexus uses cookies and analytics to help us improve your experience.
-          </p>
-          <Button className="bg-cyan-500 hover:bg-cyan-600 text-white whitespace-nowrap">Continue</Button>
-        </div>
+          {/* Copyright & Cookie Section */}
+          <div className="mt-8 pt-6 border-t border-slate-700 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
+            <p className="text-[#C5C5C5] text-sm md:text-base">
+              © All rights reserved - Property Nexus 2025
+            </p>
 
-        {/* Copyright */}
-        <div className="mt-8 pt-8 border-t border-slate-700 text-center">
-          <p className="text-gray-500 text-xs">© All rights reserved - Property Nexus 2025</p>
+            <p className="text-[#C5C5C5] text-xs md:text-sm max-w-lg">
+              Property Nexus uses cookies and analytics to help us improve your experience.
+            </p>
+
+            <Button className="bg-gradient hover:bg-gradient/95 h-[44px] px-8 text-white text-sm md:text-base">
+              Continue
+            </Button>
+          </div>
         </div>
       </div>
     </footer>
+    </div>
   )
 }

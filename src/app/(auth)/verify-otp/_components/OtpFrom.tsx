@@ -10,16 +10,11 @@ export default function OtpVerificationPage() {
     const inputRefs = useRef<(HTMLInputElement | null)[]>([])
 
     const handleInputChange = (index: number, value: string) => {
-        // only digits
         if (/^\d*$/.test(value)) {
             const newOtp = [...otp]
-            newOtp[index] = value.slice(-1) // ensure 1 digit only
+            newOtp[index] = value.slice(-1)
             setOtp(newOtp)
-
-            // move to next input if not last and value entered
-            if (value && index < otp.length - 1) {
-                inputRefs.current[index + 1]?.focus()
-            }
+            if (value && index < otp.length - 1) inputRefs.current[index + 1]?.focus()
         }
     }
 
@@ -35,7 +30,6 @@ export default function OtpVerificationPage() {
         if (/^\d{6}$/.test(pastedData)) {
             const digits = pastedData.split("")
             setOtp(digits)
-            // focus last input
             inputRefs.current[otp.length - 1]?.focus()
         }
     }
@@ -45,19 +39,18 @@ export default function OtpVerificationPage() {
         if (otp.every((digit) => digit)) {
             const enteredOtp = otp.join("")
             console.log("Submitted OTP:", enteredOtp)
-            // handle verify OTP logic here
         }
     }
 
     return (
         <AuthLayout imageSrc="/images/auth-side.png" imagePosition="right">
-            <div className="bg-[#FFFFFF33]/20 rounded-xl p-8 space-y-6 w-[500px]">
+            <div className="bg-[#FFFFFF33]/20 rounded-xl p-4 md:p-8 space-y-6 w-full lg:w-[550px]">
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
-                        <h2 className="text-[40px] font-bold mb-2 bg-gradient-to-r from-[#0078B8] to-[#229F99] text-transparent bg-clip-text">
+                        <h2 className="text-[25px] lg:text-[40px] font-bold mb-2 bg-gradient-to-r from-[#0078B8] to-[#229F99] text-transparent bg-clip-text">
                             Verify OTP
                         </h2>
-                        <p className="text-white text-base">
+                        <p className="text-white text-sm lg:text-base">
                             We’ve sent a verification code to your email. Enter it below to continue.
                         </p>
                     </div>
@@ -67,25 +60,21 @@ export default function OtpVerificationPage() {
                             {otp.map((digit, index) => (
                                 <Input
                                     key={index}
-                                    ref={(el: HTMLInputElement | null) => {
-                                        if (el !== null) {
-                                            inputRefs.current[index] = el;
-                                        }
-                                    }}
+                                    ref={(el) => { if (el) inputRefs.current[index] = el }}
                                     type="text"
                                     maxLength={1}
                                     value={digit}
                                     onChange={(e) => handleInputChange(index, e.target.value)}
                                     onKeyDown={(e) => handleKeyDown(index, e)}
                                     onPaste={handlePaste}
-                                    className="w-12 h-12 text-center text-lg font-semibold bg-[#2c3d5c]
-                    border-2 border-gray-600 text-white rounded-lg focus:outline-none
-                    focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/50"
+                                    className="w-10 lg:w-12 h-10 lg:h-12 text-center text-lg font-semibold 
+                                        border-2 border-gray-600 text-white rounded-lg focus:outline-none
+                                        focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/50"
                                 />
                             ))}
                         </div>
 
-                        <div className="text-center text-sm text-gray-300">
+                        <div className="text-center text-xs lg:text-sm text-gray-300">
                             Resend code in <span className="text-cyan-400 font-medium">30</span>s
                         </div>
                     </div>
@@ -93,9 +82,9 @@ export default function OtpVerificationPage() {
                     <Button
                         type="submit"
                         disabled={!otp.every((digit) => digit)}
-                        className="w-full h-[51px] text-white font-semibold rounded-lg
-              bg-[linear-gradient(90deg,#0078B8_0%,#229F99_101.35%),linear-gradient(338.72deg,rgba(0,118,180,0.2)_14.2%,rgba(51,164,150,0.2)_83.33%)]
-              hover:opacity-90 disabled:opacity-60"
+                        className="w-full h-[35px] lg:h-[51px] text-white font-semibold rounded-lg
+                            bg-[linear-gradient(90deg,#0078B8_0%,#229F99_101.35%),linear-gradient(338.72deg,rgba(0,118,180,0.2)_14.2%,rgba(51,164,150,0.2)_83.33%)]
+                            hover:opacity-90 disabled:opacity-60 text-sm lg:text-base"
                     >
                         Verify
                     </Button>
