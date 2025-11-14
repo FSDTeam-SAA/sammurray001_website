@@ -24,7 +24,7 @@ export default function HeroSection() {
 
             <p className="mb-8 text-base text-[#FFFFFF] sm:text-base font-normal leading-[150%] max-w-[620px]">
               Property Nexus is a digital marketplace that connects people and businesses seeking property or space with
-              those offering it. We don't own or manage the listed properties and are not a real estate agency.
+              those offering it. We don&apos;t own or manage the listed properties and are not a real estate agency.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 mb-[40px]">

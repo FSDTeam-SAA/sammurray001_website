@@ -17,7 +17,7 @@ export default function PrivacyPage() {
             <div>
               <h2 className="text-xl font-bold text-accent sm:text-2xl">1. Who We Are</h2>
               <p className="mt-4 leading-relaxed text-[#FFFFFF]">
-                Property Nexus ("us") is a digital marketplace that connects people and businesses seeking property or
+                Property Nexus (&apos;us&apos;) is a digital marketplace that connects people and businesses seeking property or
                 space with those offering it. We do not own or manage the listed properties and are not a real estate
                 agency.
               </p>

@@ -14,7 +14,7 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center gap-6 md:gap-12 text-center md:text-left">
           <div>
             <h1 className="text-2xl md:text-[42px] font-bold text-[#000000] mb-3 md:mb-4">
-              Let's chat about your
+              Let&apos;s chat about your
             </h1>
             <h1 className="bg-text-gradient bg-clip-text text-transparent text-2xl md:text-[48px] font-bold leading-tight md:leading-[1.2]">
               dreams and goals.
@@ -22,7 +22,7 @@ export default function Footer() {
           </div>
 
           <Button className="bg-gradient hover:bg-gradient/95 h-[48px] md:h-[56px] px-8 md:px-[50px] text-white text-sm md:text-base">
-            Let's talk →
+            Let&apos;s talk →
           </Button>
         </div>
       </div>

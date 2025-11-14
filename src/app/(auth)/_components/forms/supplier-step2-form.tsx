@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Upload } from "lucide-react"
+import Image from "next/image"
 
 interface SupplierStepTwoFormProps {
   onSubmit: () => void
@@ -17,6 +18,7 @@ export default function SupplierStepTwoForm({
 }: SupplierStepTwoFormProps) {
   const [licenseFile, setLicenseFile] = useState<File | null>(null)
   const [logoFile, setLogoFile] = useState<File | null>(null)
+  console.log(logoFile)
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
 
   const handleLicenseChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,9 +101,11 @@ export default function SupplierStepTwoForm({
               onChange={handleLogoChange}
             />
             {logoPreview ? (
-              <img
+              <Image
                 src={logoPreview}
                 alt="Logo Preview"
+                width={100}
+                height={100}
                 className="mx-auto h-[70px] object-contain"
               />
             ) : (

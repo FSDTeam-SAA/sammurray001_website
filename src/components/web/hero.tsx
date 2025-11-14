@@ -8,7 +8,7 @@ import { ChevronDown } from "lucide-react"
 export default function Hero() {
   const [location, setLocation] = useState("")
   const [type, setType] = useState("")
-  const [size, setSize] = useState("")
+  // const [size, setSize] = useState("")
 
   return (
     <section className="relative bg-cover bg-center">

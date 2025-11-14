@@ -18,7 +18,7 @@ export default function TermsPage() {
             <div>
               <h2 className="text-xl font-bold text-accent sm:text-2xl">1. Acceptance of Terms</h2>
               <p className="mt-4 leading-relaxed text-[#FFFFFF]">
-                By accessing or using Property Nexus ("The Platform") you agree to these Terms of Service and our
+                By accessing or using Property Nexus (&apos;The Platform&apos;) you agree to these Terms of Service and our
                 Privacy Policy. If you do not agree, please do not use the Platform.
               </p>
             </div>
@@ -90,7 +90,7 @@ export default function TermsPage() {
             <div>
               <h2 className="text-xl font-bold text-accent sm:text-2xl">7. Limitation of Liability</h2>
               <p className="mt-4 leading-relaxed text-[#FFFFFF]">
-                Property Nexus is provided "as is." We do not guarantee continuous availability of accuracy of content.
+                Property Nexus is provided &apos;as is.&apos; We do not guarantee continuous availability of accuracy of content.
                 To the extent permitted by law, we exclude all liability for loss or damage arising from use of the
                 Platform.
               </p>
@@ -100,7 +100,7 @@ export default function TermsPage() {
             <div>
               <h2 className="text-xl font-bold text-accent sm:text-2xl">8. Termination</h2>
               <p className="mt-4 leading-relaxed text-[#FFFFFF]">
-                We may suspend or terminate access at any time if we believe you've breached these Terms or for
+                We may suspend or terminate access at any time if we believe you&apos;ve breached these Terms or for
                 maintenance and security reasons.
               </p>
             </div>
