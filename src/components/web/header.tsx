@@ -82,12 +82,10 @@ export default function Header() {
               </SheetTrigger>
 
               <SheetContent side="right" className="w-64 bg-[#070E28] text-gray-300">
-                <SheetHeader className="flex justify-between items-center border-b border-slate-800">
+                <SheetHeader className="flex justify-between items-center ">
                   <SheetTitle>Menu</SheetTitle>
                   <SheetTrigger asChild>
-                    <button className="p-2">
-                      <X size={20} />
-                    </button>
+                  
                   </SheetTrigger>
                 </SheetHeader>
 
