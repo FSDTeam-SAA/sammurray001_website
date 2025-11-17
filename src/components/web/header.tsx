@@ -1,6 +1,6 @@
 "use client"
 
-import { Heart, Menu, X, MessageCircleMore, CircleUserRound } from "lucide-react"
+import { Heart, Menu, MessageCircleMore, CircleUserRound } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import Image from "next/image"
