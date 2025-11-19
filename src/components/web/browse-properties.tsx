@@ -196,7 +196,7 @@ export default function BrowseProperties() {
           </div>
         ) : listings.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-            {listings.map((listing) => (
+            {listings.slice(0, 4).map((listing) => (
               <ListingCard
                 key={listing.id}
                 listing={listing}
