@@ -43,7 +43,7 @@ export default function Header() {
     { name: "About Us", href: "/about-us", icon: Info },
     { name: "Find Space", href: "/find-space", icon: Search },
     { name: "Find Tenants", href: "/find-tenants", icon: Users },
-    { name: "Map", href: "/#map", icon: Map },
+    { name: "Priceing", href: "/pricing", icon: Map },
   ]
 
   const [wishlistCount, setWishlistCount] = useState(0)
@@ -69,18 +69,18 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 h-[82px] bg-[#070E28] border-b border-slate-800">
+      <header className="sticky top-0 z-50  bg-[#070E28] border-b border-slate-800">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex justify-between items-center ">
 
             {/* Logo */}
             <Link href="/" className="flex-shrink-0">
               <Image 
                 src="/assets/logo.jpg" 
                 alt="Logo" 
-                width={1000} 
-                height={1000} 
-                className="w-[141px] sm:w-[141px] h-[100px] object-contain"
+                width={100} 
+                height={100} 
+                className=" w-[100px] lg:w-[141px] h-[80px] lg:h-[141px] "
               />
             </Link>
 
@@ -137,7 +137,7 @@ export default function Header() {
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        className="flex items-center gap-3 text-red-400 cursor-pointer focus:bg-red-900/20"
+                        className="flex items-center gap-3 text-red-400 cursor-pointer focus:bg-red-400"
                         onClick={() => setLogoutDialogOpen(true)}
                       >
                         <LogOut size={18} /> Logout
@@ -241,10 +241,10 @@ export default function Header() {
                           setLogoutDialogOpen(true)
                           setSheetOpen(false)
                         }}
-                        className="flex items-center gap-4 px-4 py-3.5 mt-8 text-red-400 hover:text-red-300 transition text-base font-medium"
+                        className="flex items-center gap-4 px-4 py-3.5 mt-8 text-red-400 hover:text-red-500 transition text-base font-medium"
                       >
                         <LogOut size={22} />
-                        <span>Logout</span>
+                        <span>Logout </span>
                       </button>
                     </>
                   ) : (
@@ -273,7 +273,7 @@ export default function Header() {
           <DialogFooter className="flex justify-end gap-3 mt-6">
             <Button
               variant="outline"
-              className="border-slate-600 text-gray-300 hover:bg-slate-800"
+              className="border-slate-600 bg-transparent  text-gray-300 hover:text-gray hover:bg-transparent"
               onClick={() => setLogoutDialogOpen(false)}
             >
               Cancel

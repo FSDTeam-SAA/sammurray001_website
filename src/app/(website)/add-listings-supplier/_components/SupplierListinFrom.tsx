@@ -195,8 +195,20 @@ export function SupplierListingForm() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#1a2745] via-[#0f1f3f] to-[#0a1428] p-4 md:p-8">
       <div className="mx-auto container ">
+         
+          <div className=" text-center pb-10">
+            <div>
+            <h1 className="text-4xl font-bold text-white md:text-5xl">
+              Add Your Property
+            </h1>
+            <p className="mt-2 text-gray-400">
+             Share your property with thousands of potential tenants
+            </p>
+            </div>
+          </div>
+      
         <Card className="border-none bg-white/10  backdrop-blur-lg p-6 md:p-10 shadow-2xl">
-          <h2 className="text-3xl font-bold text-white mb-8 text-center">Add New Property Listing</h2>
+         
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-7">
 

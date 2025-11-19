@@ -1,10 +1,11 @@
+export const dynamic = "force-dynamic";
 import React from 'react'
-import { ListingFrom } from './_components/ListingFrom'
+import { ListingForm } from './_components/ListingFrom';
 
 const page = () => {
   return (
     <div>
-      <ListingFrom/>
+      <ListingForm/>
     </div>
   )
 }

@@ -4,15 +4,40 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useState } from "react"
 import { ChevronDown } from "lucide-react"
+import { useSession } from "next-auth/react"
+import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 export default function Hero() {
   const [location, setLocation] = useState("")
   const [type, setType] = useState("")
-  // const [size, setSize] = useState("")
+  const { data: session } = useSession()
+  const userRole = session?.user?.role
+  console.log(userRole)
+  const router = useRouter()
+
+  // Handle Button 1 Click (I need a space)
+// Handle Button 1 Click (I need space)
+const handleNeedSpace = () => {
+  if (userRole === "SUPPLIER") {
+    toast.error("Please login as tenant");
+    return;
+  }
+  router.push("/add-listings-tetans");
+};
+
+// Handle Button 2 Click (I have a property)
+const handleHaveProperty = () => {
+  if (userRole === "TENANT") {
+    toast.error("Please login as supplier");
+    return;
+  }
+  router.push("/add-listings-supplier");
+};
+
 
   return (
     <section className="relative bg-cover bg-center">
-      {/* Background Image */}
       <div
         className="h-[822px] flex items-end justify-center"
         style={{
@@ -22,8 +47,8 @@ export default function Hero() {
         }}
       >
         <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 pb-10">
-          {/* Responsive Flex Container */}
           <div className="flex flex-col lg:flex-row lg:justify-between gap-10">
+            
             {/* Left Content */}
             <div className="flex-1 flex flex-col justify-start lg:justify-between">
               <h1 className="text-[28px] md:text-[40px] lg:text-[60px] font-extrabold mb-3 md:mb-6 text-white leading-[150%]">
@@ -31,10 +56,20 @@ export default function Hero() {
               </h1>
 
               <div className="flex flex-col sm:flex-row sm:gap-4 mt-6 lg:mt-0">
-                <Button className="bg-gradient hover:bg-gradient/80 h-10 md:h-[56px] px-[53px] text-white text-base md:text-[18px] font-semibold mb-4 sm:mb-0">
+
+                {/* I need a space button */}
+                <Button
+                  onClick={handleNeedSpace}
+                  className="bg-gradient hover:bg-gradient/80 h-10 md:h-[56px] px-[53px] text-white text-base md:text-[18px] font-semibold mb-4 sm:mb-0"
+                >
                   I need a space
                 </Button>
-                <Button className="bg-white hover:bg-white h-10 md:h-[56px] py-3 md:py-3 rounded-lg border border-gray-200 px-[53px] text-white text-base md:text-[18px] font-semibold">
+
+                {/* I have a property button */}
+                <Button
+                  onClick={handleHaveProperty}
+                  className="bg-white hover:bg-white h-10 md:h-[56px] border border-gray-200 px-[53px] rounded-lg text-white text-base md:text-[18px] font-semibold"
+                >
                   <span className="bg-text-gradient bg-clip-text text-transparent font-semibold">
                     I have a property
                   </span>
@@ -44,14 +79,11 @@ export default function Hero() {
 
             {/* Right Search Form */}
             <div className="flex-1 max-w-full lg:max-w-[527px] bg-white rounded-lg p-6 space-y-4 shadow-lg">
-              <h3 className="text-[26px] md:text-[32px] font-semibold text-[#000000]">
-                Search properties
-              </h3>
+              
+              <h3 className="text-[26px] md:text-[32px] font-semibold text-[#000000]">Search properties</h3>
 
               <div>
-                <label className="text-base text-[#000000] block mb-1">
-                  Search for properties
-                </label>
+                <label className="text-base text-[#000000] block mb-1">Search for properties</label>
                 <Input
                   placeholder="Search..."
                   className="border-[#BFBFBF] placeholder:text-[#595959] text-[#595959] h-[48px] rounded-[8px]"
@@ -59,9 +91,7 @@ export default function Hero() {
               </div>
 
               <div>
-                <label className="text-base text-[#000000] block mb-1">
-                  Location
-                </label>
+                <label className="text-base text-[#000000] block mb-1">Location</label>
                 <div className="relative">
                   <select
                     value={location}
@@ -80,9 +110,7 @@ export default function Hero() {
               </div>
 
               <div>
-                <label className="text-base text-[#000000] block mb-1">
-                  Type
-                </label>
+                <label className="text-base text-[#000000] block mb-1">Type</label>
                 <div className="relative">
                   <select
                     value={type}
