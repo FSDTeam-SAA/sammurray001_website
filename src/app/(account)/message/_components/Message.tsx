@@ -1,219 +1,368 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import React, { useState } from "react";
-import { Search, Paperclip, Send, Check, ChevronRight } from "lucide-react";
 
-const Message = () => {
-  const [message, setMessage] = useState("");
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { Search, Paperclip, Send } from "lucide-react";
+import Image from "next/image";
+import { useQuery } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
+import { socket } from "@/lib/socket";
 
-  const conversations = [
-    {
-      id: 1,
-      name: "Darrell Steward",
-      lastMessage: "Is the property still available?",
-      time: "2 min ago",
-      unread: 2,
-      avatar: "DS",
-      online: true,
-    },
-    {
-      id: 2,
-      name: "Dianne Russell",
-      lastMessage: "Thank you for the information!",
-      time: "1 hour ago",
-      unread: 0,
-      avatar: "DR",
-      online: true,
-    },
-    {
-      id: 3,
-      name: "Wade Warren",
-      lastMessage: "Can we schedule a viewing?",
-      time: "Yesterday",
-      unread: 1,
-      avatar: "WW",
-      online: false,
-    },
-  ];
+interface IUser {
+  _id: string;
+  email: string;
+  profileImage?: string;
+  fullName?: string; // ✅ FIX: optional added
+  name?: string; // fallback
+}
 
-  const chatMessages = [
-    {
-      id: 1,
-      text: "Hi! I'm interested in the office space in Auckland CBD.",
-      time: "10:30 AM",
-      sender: "other",
+interface IConversation {
+  _id: string;
+  members: IUser[];
+}
+
+interface IMessage {
+  _id: string;
+  senderId: string | IUser;
+  receiverId: string | IUser;
+  conversationId: string;
+  message?: string;
+  fileUrl?: string; // ✅ File support added
+}
+
+function InboxPage() {
+  const { data: session } = useSession();
+  const userId = session?.user?.id || "";
+  const TOKEN = session?.user?.accessToken || "";
+
+  const [selectedConversationId, setSelectedConversationId] =
+    useState<string>("");
+  const [messageInput, setMessageInput] = useState("");
+  const [messages, setMessages] = useState<IMessage[]>([]);
+  const messagesRef = useRef<IMessage[]>([]);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const [unreadCount, setUnreadCount] = useState<{ [key: string]: number }>({});
+
+  // ------------------ Fetch Conversations ------------------
+  const { data: convRes } = useQuery<IConversation[]>({
+    queryKey: ["conversations"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/conversation`,
+        {
+          headers: { Authorization: `Bearer ${TOKEN}` },
+        }
+      );
+      const json = await res.json();
+      return json.data;
     },
-    {
-      id: 2,
-      text: "Hello! Thanks for your interest. The property is still available. Would you like to schedule a viewing?",
-      time: "10:32 AM",
-      sender: "me",
-      read: true,
-    },
-    {
-      id: 3,
-      text: "Yes, that would be great! What times are available this week?",
-      time: "10:35 AM",
-      sender: "other",
-    },
-    {
-      id: 4,
-      text: "I have availability on Tuesday at 2 PM or Thursday at 10 AM. Which works better for you?",
-      time: "10:37 AM",
-      sender: "me",
-      read: true,
-    },
-    {
-      id: 5,
-      text: "Tuesday at 2 PM would be perfect!",
-      time: "10:40 AM",
-      sender: "other",
-    },
-  ];
+    enabled: !!userId,
+  });
+
+  const conversations = convRes || [];
+  const selectedConversation = conversations.find(
+    (c) => c._id === selectedConversationId
+  );
+
+  // ------------------ Fetch Messages ------------------
+  const fetchMessages = useCallback(async () => {
+    if (!selectedConversationId) return;
+
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/message/${selectedConversationId}`,
+      {
+        headers: { Authorization: `Bearer ${TOKEN}` },
+      }
+    );
+
+    const json = await res.json();
+    setMessages(json.data);
+    messagesRef.current = json.data;
+
+    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [selectedConversationId, TOKEN]);
+
+  useEffect(() => {
+    fetchMessages();
+  }, [fetchMessages]);
+
+  // ------------------ SOCKET INITIAL JOIN ------------------
+  useEffect(() => {
+    if (!userId) return;
+
+    socket.emit("join", userId);
+  }, [userId]);
+
+  // ------------------ SOCKET ROOM JOIN ------------------
+  useEffect(() => {
+    if (!selectedConversationId) return;
+
+    socket.emit("join-chat", { conversationId: selectedConversationId });
+
+    // ✅ FIX: return cleanup must be void (not returning socket)
+    return () => {
+      socket.emit("leave-chat", {});
+    };
+  }, [selectedConversationId]);
+
+  // ------------------ RECEIVE MESSAGE ------------------
+  useEffect(() => {
+  const handleReceive = (msg: IMessage) => {
+    if (msg.conversationId === selectedConversationId) {
+      messagesRef.current = [...messagesRef.current, msg];
+      setMessages([...messagesRef.current]);
+    } else {
+      setUnreadCount((prev) => ({
+        ...prev,
+        [msg.conversationId]: (prev[msg.conversationId] || 0) + 1,
+      }));
+    }
+  };
+
+  socket.on("receive-message", handleReceive);
+
+  // ✅ Wrap in void arrow to satisfy TypeScript
+  return () => { socket.off("receive-message", handleReceive); };
+}, [selectedConversationId]);
+
+
+  // ------------------ SEND TEXT MESSAGE ------------------
+  const handleSendMessage = async () => {
+    if (!messageInput.trim() || !selectedConversation) return;
+
+    const receiver = selectedConversation.members.find((m) => m._id !== userId);
+    if (!receiver) return;
+
+    const payload: any = {
+      senderId: userId,
+      receiverId: receiver._id,
+      conversationId: selectedConversation._id,
+      message: messageInput,
+    };
+
+    await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/message`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${TOKEN}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    socket.emit("send-message", payload);
+
+    messagesRef.current = [
+      ...messagesRef.current,
+      { ...payload, _id: Date.now().toString() },
+    ];
+
+    setMessages([...messagesRef.current]);
+    setMessageInput("");
+
+    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // ------------------ SEND FILE ------------------
+  const handleSendFile = async (file: File) => {
+    if (!selectedConversation) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("conversationId", selectedConversation._id);
+
+    const receiver = selectedConversation.members.find((m) => m._id !== userId);
+    if (!receiver) return;
+
+    formData.append("senderId", userId);
+    formData.append("receiverId", receiver._id);
+
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/message/file`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${TOKEN}` },
+        body: formData,
+      }
+    );
+
+    const json = await res.json();
+    const msg = json.data;
+
+    socket.emit("send-message", msg);
+
+    messagesRef.current = [...messagesRef.current, msg];
+    setMessages([...messagesRef.current]);
+
+    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   return (
-    <div className="">
-      <div className="w-full py-12 px-6 flex justify-center">
-        <div className="max-w-7xl text-center">
-          <h1 className="text-5xl font-serif text-white mb-4">Messages</h1>
-
-          <div className="flex items-center justify-center gap-2 text-sm">
-            <a
-              href="/"
-              className="text-gray-400 hover:text-white transition-colors"
-            >
-              Home
-            </a>
-            <ChevronRight className="w-4 h-4 text-gray-400" />
-            <span className="text-gray-300">Messages</span>
+    <div className="flex h-[80vh] container mx-auto py-9 px-10">
+      {/* Sidebar */}
+      <div className="w-80 bg-[#FFFFFF1A] border border-gray-200 flex flex-col">
+        <div className="p-6 border-b border-gray-200">
+          <h1 className="text-2xl font-bold text-white mb-4">Messages</h1>
+          <div className="relative">
+            <Search size={18} className="absolute left-3 top-3 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search Message ..."
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+            />
           </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto">
+          {conversations.map((c) => {
+            const otherUser = c.members.find((m) => m._id !== userId);
+
+            return (
+              <button
+                key={c._id}
+                onClick={() => {
+                  setSelectedConversationId(c._id);
+                  setUnreadCount((prev) => ({ ...prev, [c._id]: 0 }));
+                }}
+                className={`w-full px-4 py-3 flex items-start gap-3 border-b border-gray-100 hover:bg-gray-400 ${
+                  selectedConversationId === c._id ? "bg-gray-400" : ""
+                }`}
+              >
+                <Image
+                  width={48}
+                  height={48}
+                  src={otherUser?.profileImage || "/noavatar.png"}
+                  alt="avatar"
+                  className="w-12 h-12 rounded-full object-cover"
+                />
+                <div className="flex-1 min-w-0 text-left">
+                  <h3 className="font-medium text-white truncate">
+                    {otherUser?.fullName || otherUser?.name || "Unknown User"}
+                  </h3>
+                  <h3 className="font-medium text-white text-xs truncate">
+                    {otherUser?.email}
+                  </h3>
+                </div>
+
+                {unreadCount[c._id] > 0 && (
+                  <span className="bg-red-500 text-white rounded-full px-2 text-xs">
+                    {unreadCount[c._id]}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      <div className="flex max-w-7xl mx-auto h-screen text-white">
-        {/* Sidebar */}
-        <div className="w-[280px] bg-[#1a1d2e] border-r border-gray-700">
-          {/* Search */}
-          <div className="p-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                placeholder="Search conversations..."
-                className="w-full bg-[#252837] rounded-lg pl-10 pr-4 py-2.5 text-sm text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
+      {/* Chat Area */}
+      <div className="flex-1 bg-[#FFFFFF1A] flex flex-col">
+        {selectedConversation && (
+          <>
+            <div className="p-6 border border-gray-200 bg-[#FFFFFF1A] flex items-center gap-3">
+              <Image
+                width={48}
+                height={48}
+                src={
+                  selectedConversation.members.find((m) => m._id !== userId)
+                    ?.profileImage || "/noavatar.png"
+                }
+                alt="User"
+                className="w-12 h-12 rounded-full object-cover"
               />
-            </div>
-          </div>
-
-          {/* Conversations List */}
-          <div className="overflow-y-auto">
-            {conversations.map((conv) => (
-              <div
-                key={conv.id}
-                className={`px-4 py-3 flex items-start gap-3 cursor-pointer hover:bg-[#252837] transition-colors ${
-                  conv.id === 1 ? "bg-[#252837]" : ""
-                }`}
-              >
-                <div className="relative">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-blue-500 flex items-center justify-center text-sm font-semibold">
-                    {conv.avatar}
-                  </div>
-                  {conv.online && (
-                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-[#1a1d2e]"></div>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-1">
-                    <h3 className="text-sm font-semibold text-white truncate">
-                      {conv.name}
-                    </h3>
-                    <span className="text-xs text-gray-400">{conv.time}</span>
-                  </div>
-                  <p className="text-xs text-gray-400 truncate">
-                    {conv.lastMessage}
-                  </p>
-                </div>
-                {conv.unread > 0 && (
-                  <div className="w-5 h-5 bg-teal-500 rounded-full flex items-center justify-center text-xs font-semibold">
-                    {conv.unread}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Chat Area */}
-        <div className="flex-1 flex flex-col">
-          {/* Chat Header */}
-          <div className="h-[70px] bg-[#1a1d2e] border-b border-gray-700 flex items-center px-6">
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-blue-500 flex items-center justify-center text-sm font-semibold">
-                  LA
-                </div>
-                <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-[#1a1d2e]"></div>
-              </div>
               <div>
-                <h2 className="text-base font-semibold text-white">
-                  Leslie Alexander
+                <h2 className="font-semibold text-base text-gray-900">
+                  {selectedConversation.members.find((m) => m._id !== userId)
+                    ?.fullName ||
+                    selectedConversation.members.find((m) => m._id !== userId)
+                      ?.name}
                 </h2>
-                <p className="text-xs text-green-400">Online</p>
+                <h2 className="font-semibold text-xs text-gray-900">
+                  {
+                    selectedConversation.members.find((m) => m._id !== userId)
+                      ?.email
+                  }
+                </h2>
               </div>
             </div>
-          </div>
 
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-[#1a1d2e]">
-            {chatMessages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`flex ${
-                  msg.sender === "me" ? "justify-end" : "justify-start"
-                }`}
-              >
-                <div
-                  className={`max-w-[60%] ${
-                    msg.sender === "me"
-                      ? "bg-teal-600 rounded-2xl rounded-br-sm"
-                      : "bg-[#252837] rounded-2xl rounded-bl-sm"
-                  } px-4 py-3`}
-                >
-                  <p className="text-sm text-white leading-relaxed">
-                    {msg.text}
-                  </p>
-                  <div className="flex items-center justify-end gap-1 mt-1">
-                    <span className="text-xs text-gray-300">{msg.time}</span>
-                    {msg.sender === "me" && msg.read && (
-                      <Check className="w-3 h-3 text-gray-300" />
-                    )}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-[#FFFFFF1A]">
+              {messages.map((m) => {
+                const sender =
+                  typeof m.senderId === "string" ? m.senderId : m.senderId._id;
+                const isSender = sender === userId;
+
+                return (
+                  <div
+                    key={m._id}
+                    className={`flex ${
+                      isSender ? "justify-end" : "justify-start"
+                    }`}
+                  >
+                    <div
+                      className={`${
+                        isSender
+                          ? "bg-green-600 text-white"
+                          : "bg-gray-200 text-gray-900"
+                      } rounded-lg px-4 py-2 max-w-xs`}
+                    >
+                      {m.message}
+
+                      {m.fileUrl && (
+                        <a
+                          href={m.fileUrl}
+                          target="_blank"
+                          className="underline block mt-1 text-sm"
+                        >
+                          📎 File
+                        </a>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Message Input */}
-          <div className="bg-[#1a1d2e] border-t border-gray-700 p-4">
-            <div className="flex items-center gap-3">
-              <button className="text-gray-400 hover:text-white transition-colors p-2">
-                <Paperclip className="w-5 h-5" />
-              </button>
-              <input
-                type="text"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="Type a message..."
-                className="flex-1 bg-transparent text-white placeholder-gray-500 focus:outline-none text-sm"
-              />
-              <button className="bg-teal-500 hover:bg-teal-600 transition-colors rounded-lg p-2.5">
-                <Send className="w-5 h-5 text-white" />
-              </button>
+                );
+              })}
+              <div ref={scrollRef} />
             </div>
-          </div>
-        </div>
+
+            <div className="p-6 border border-gray-200 bg-[#FFFFFF1A]">
+              <div className="flex items-center gap-3">
+                {/* FILE INPUT */}
+                <label className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg cursor-pointer">
+                  <Paperclip size={20} />
+                  <input
+                    type="file"
+                    hidden
+                    onChange={(e) => {
+                      if (e.target.files?.[0]) {
+                        handleSendFile(e.target.files[0]);
+                      }
+                    }}
+                  />
+                </label>
+
+                <input
+                  type="text"
+                  placeholder="Type your message..."
+                  value={messageInput}
+                  onChange={(e) => setMessageInput(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+                  className="flex-1 bg-gray-100 rounded-full px-4 py-2 outline-none"
+                />
+
+                <button
+                  onClick={handleSendMessage}
+                  className="p-3 bg-green-600 text-white rounded-full hover:bg-green-700"
+                >
+                  <Send size={20} />
+                </button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
-};
+}
 
-export default Message;
+export default InboxPage;

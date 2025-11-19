@@ -5,9 +5,6 @@ import ListingCard, { Listing } from "../Reuseable_cards/PropertiesCard";
 import { jwtDecode } from "jwt-decode";
 import { useSession } from "next-auth/react";
 
-// =======================
-// API Types (Full Safe)
-// =======================
 interface ApiProperty {
   _id: string;
   type: { name: string };
@@ -39,10 +36,6 @@ interface ApiResponse {
   message: string;
   data: ApiProperty[];
 }
-
-// =======================
-// Token Decode Type
-// =======================
 interface DecodedToken {
   id: string;
   role: string;
@@ -53,9 +46,6 @@ interface DecodedToken {
   exp: number;
 }
 
-// =======================
-// Format Price
-// =======================
 const formatPrice = (price: number): string => {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -65,14 +55,6 @@ const formatPrice = (price: number): string => {
   }).format(price);
 };
 
-// =======================
-// Get Token
-// =======================
-
-
-// =======================
-// FeaturedListings Component
-// =======================
 export default function BrowseProperties() {
   // Decode token for subscription check
   const sesseion=useSession()
@@ -119,10 +101,11 @@ export default function BrowseProperties() {
     retry: 1,
   });
 
-  // Transform data → ListingCard format
+
   const listings: Listing[] =
     response?.data.map((property): Listing => ({
       id: property._id,
+      user: property.user || "",
       image: property.thumble || "/assets/fallback-image.png",
       type: property.type?.name || "Unknown",
       badge: "Top pick",
@@ -136,7 +119,7 @@ export default function BrowseProperties() {
         : property.city,
     })) || [];
 
-  // Skeleton UI
+
   const SkeletonCard = () => (
     <div className="bg-gray-900 rounded-2xl overflow-hidden border border-gray-800 hover:border-gray-700 transition-all duration-300 group">
       <div className="relative">

@@ -123,6 +123,7 @@ export default function FeaturedListings() {
   const listings: Listing[] =
     response?.data.map((property): Listing => ({
       id: property._id,
+      user: property.user || "", // ✅ এখানে যোগ করো
       image: property.thumble || "/assets/fallback-image.png",
       type: property.type?.name || "Unknown",
       badge: "Top pick",
