@@ -4,6 +4,7 @@ import "./globals.css";
 import NextTopLoader from "nextjs-toploader";
 import AppProvider from "@/provider/AppProvider";
 import AuthProvider from "@/provider/AuthProvider";
+import { Toaster } from "@/components/ui/sonner";
 
 // Google Fonts
 const montserrat = Montserrat({
@@ -38,6 +39,7 @@ export default function RootLayout({
         <NextTopLoader color="#0078B8" height={3} showSpinner={false} />
         <AuthProvider>
           <AppProvider>{children}</AppProvider>
+           <Toaster position="top-right" />
         </AuthProvider>
       </body>
     </html>
