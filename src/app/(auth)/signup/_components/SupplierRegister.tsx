@@ -537,7 +537,7 @@ export default function SupplierRegister() {
 
               <div className="text-center text-sm text-slate-400">
                 Already have an account?{" "}
-                <Link href="/signin">
+                <Link href="/login">
                   <span className="text-cyan-400 hover:underline font-medium">
                     Log In
                   </span>

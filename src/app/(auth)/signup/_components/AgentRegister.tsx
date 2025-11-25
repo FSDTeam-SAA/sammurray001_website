@@ -335,7 +335,7 @@ export default function AgentRegister() {
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
                         <FieldLabel className="text-slate-300 text-sm font-normal">
-                          Agency Name
+                          Website Name
                         </FieldLabel>
                         <Input
                           {...field}
@@ -537,7 +537,7 @@ export default function AgentRegister() {
 
               <div className="text-center text-sm text-slate-400">
                 Already have an account?{" "}
-                <Link href="/signin">
+                <Link href="/login">
                   <span className="text-cyan-400 hover:underline font-medium">
                     Log In
                   </span>
