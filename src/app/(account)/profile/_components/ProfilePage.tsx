@@ -1,3 +1,6 @@
+
+
+
 // "use client";
 
 // import React, { useState, useEffect, ChangeEvent } from "react";
@@ -6,16 +9,34 @@
 // import { useSession } from "next-auth/react";
 // import { toast } from "sonner";
 
+// interface UserResult {
+//   _id: string;
+//   fullName: string;
+//   email: string;
+//   phone: string;
+//   bio: string;
+//   role: string;
+//   profileImage?: string;
+//   location?: string;
+//   verified?: boolean;
+//   isSubscription?: boolean;
+//   [key: string]: any; // to allow other optional fields
+// }
+
+// interface Supplier {
+//   _id: string;
+//   agentId: string[];
+//   supplierId: UserResult;
+//   [key: string]: any;
+// }
+
 // interface ApiResponse {
 //   statusCode: number;
 //   success: boolean;
 //   message: string;
 //   data: {
-//     _id: string;
-//     fullName: string;
-//     email: string;
-//     phone: string;
-//     bio: string;
+//     result: UserResult;
+//     supplier: Supplier[];
 //   };
 // }
 
@@ -57,30 +78,18 @@
 //     },
 //     enabled: !!TOKEN,
 //   });
-//   console.log(userData, "userData");
 
 //   // ===================== PREFILL FORM ========================
-//   // useEffect(() => {
-//   //   if (userData?.data) {
-//   //     setFormData({
-//   //       fullName: userData.data.fullName || "",
-//   //       email: userData.data.email || "",
-//   //       phone: userData.data.phone || "",
-//   //       bio: userData.data.bio || "",
-//   //     });
-//   //   }
-//   // }, [userData]);
 //   useEffect(() => {
-//   if (userData?.data?.result) {
-//     setFormData({
-//       fullName: userData.data.result.fullName || "",
-//       email: userData.data.result.email || "",
-//       phone: userData.data.result.phone || "",
-//       bio: userData.data.result.bio || "",
-//     });
-//   }
-// }, [userData]);
-
+//     if (userData?.data?.result) {
+//       setFormData({
+//         fullName: userData.data.result.fullName || "",
+//         email: userData.data.result.email || "",
+//         phone: userData.data.result.phone || "",
+//         bio: userData.data.result.bio || "",
+//       });
+//     }
+//   }, [userData]);
 
 //   // ===================== UPDATE MUTATION ========================
 //   const updateMutation = useMutation({
@@ -99,9 +108,8 @@
 //       if (!res.ok) throw new Error("Failed to update profile");
 //       return res.json();
 //     },
-//     onSuccess: (res) => {
+//     onSuccess: (res: { data: UserResult }) => {
 //       toast.success("Profile updated successfully!");
-//       // Update form with returned data
 //       setFormData({
 //         fullName: res.data.fullName,
 //         email: res.data.email,
@@ -176,7 +184,6 @@
 //                 readOnly
 //                 name="email"
 //                 value={formData.email}
-//                 onChange={handleChange}
 //                 className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
 //               />
 //             </div>
@@ -210,6 +217,8 @@
 //             </div>
 //           </form>
 //         </div>
+
+        
 //       </div>
 //     </div>
 //   );
@@ -232,19 +241,9 @@ interface UserResult {
   email: string;
   phone: string;
   bio: string;
-  role: string;
   profileImage?: string;
   location?: string;
-  verified?: boolean;
-  isSubscription?: boolean;
-  [key: string]: any; // to allow other optional fields
-}
-
-interface Supplier {
-  _id: string;
-  agentId: string[];
-  supplierId: UserResult;
-  [key: string]: any;
+  role: string;
 }
 
 interface ApiResponse {
@@ -253,7 +252,8 @@ interface ApiResponse {
   message: string;
   data: {
     result: UserResult;
-    supplier: Supplier[];
+    agent?: any[];
+    supplier?: any[];
   };
 }
 
@@ -264,11 +264,10 @@ interface UpdatePayload {
   bio: string;
 }
 
-function ProfilePage() {
-  const { data: session } = useSession();
-  const TOKEN = session?.user?.accessToken;
+export default function ProfilePage() {
+  const { data: session, status } = useSession();
+  const token = session?.user?.accessToken;
 
-  // ===================== FORM STATE ========================
   const [formData, setFormData] = useState<UpdatePayload>({
     fullName: "",
     email: "",
@@ -276,169 +275,183 @@ function ProfilePage() {
     bio: "",
   });
 
-  // ===================== GET USER DATA ========================
-  const { data: userData, isLoading } = useQuery<ApiResponse>({
-    queryKey: ["user-data"],
+  // Fetch Profile
+  const { data: userData, isLoading, error } = useQuery<ApiResponse>({
+    queryKey: ["user-profile"],
     queryFn: async () => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/user/profile`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${TOKEN}`,
-          },
-        }
-      );
-      if (!res.ok) throw new Error("Failed to fetch user profile");
+      if (!token) throw new Error("No token found");
+
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/user/profile`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || "Failed to fetch profile");
+      }
       return res.json();
     },
-    enabled: !!TOKEN,
+    enabled: !!token, // শুধু টোকেন থাকলে চলবে
+    retry: 1,
   });
 
-  // ===================== PREFILL FORM ========================
+  // Pre-fill form when data loads
   useEffect(() => {
     if (userData?.data?.result) {
+      const user = userData.data.result;
       setFormData({
-        fullName: userData.data.result.fullName || "",
-        email: userData.data.result.email || "",
-        phone: userData.data.result.phone || "",
-        bio: userData.data.result.bio || "",
+        fullName: user.fullName || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        bio: user.bio || "",
       });
     }
   }, [userData]);
 
-  // ===================== UPDATE MUTATION ========================
+  // Update Profile
   const updateMutation = useMutation({
-    mutationFn: async (bodyData: UpdatePayload) => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/user/profile`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${TOKEN}`,
-          },
-          body: JSON.stringify(bodyData),
-        }
-      );
-      if (!res.ok) throw new Error("Failed to update profile");
+    mutationFn: async (payload: UpdatePayload) => {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/user/profile`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || "Update failed");
+      }
       return res.json();
     },
-    onSuccess: (res: { data: UserResult }) => {
+    onSuccess: (res) => {
       toast.success("Profile updated successfully!");
-      setFormData({
-        fullName: res.data.fullName,
-        email: res.data.email,
-        phone: res.data.phone,
-        bio: res.data.bio,
-      });
+      // Update form again with fresh data
+      if (res.data?.result) {
+        const user = res.data.result;
+        setFormData({
+          fullName: user.fullName || "",
+          email: user.email || "",
+          phone: user.phone || "",
+          bio: user.bio || "",
+        });
+      }
     },
-    onError: () => {
-      toast.error("Something went wrong. Try again!");
+    onError: (err: any) => {
+      toast.error(err.message || "Failed to update profile");
     },
   });
 
-  // ===================== INPUT HANDLER ========================
-  const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }));
   };
 
-  // ===================== FORM SUBMIT ========================
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     updateMutation.mutate(formData);
   };
 
-  if (isLoading) return <p>Loading...</p>;
+  // Loading State
+  if (isLoading || status === "loading") {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <p className="text-xl text-slate-400">Loading profile...</p>
+      </div>
+    );
+  }
+
+  // Error State
+  if (error) {
+    return (
+      <div className="text-center py-20">
+        <p className="text-red-400">Error: {(error as Error).message}</p>
+        <p className="text-slate-500 mt-2">Please try refreshing the page.</p>
+      </div>
+    );
+  }
+
+  // No Token / Not Logged In
+  if (!token) {
+    return (
+      <div className="text-center py-20 text-slate-400">
+        Please login to view your profile.
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen text-white">
-      <div className="max-w-4xl mx-auto">
-        {/* Personal Information Card */}
-        <div className="rounded-2xl p-8 border border-slate-700">
-          {/* Card Header */}
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold">Personal Information</h2>
-            <button
-              onClick={handleSubmit}
-              className="flex items-center gap-2 bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-2 rounded-lg transition-colors"
-            >
-              <Edit className="w-4 h-4" />
-              <span className="font-medium">Edit</span>
-            </button>
-          </div>
-
-          {/* Form */}
-          <form className="space-y-6">
-            {/* Full Name */}
-            <div>
-              <label className="block text-sm font-medium mb-2 text-slate-300">
-                Full Name
-              </label>
-              <input
-                type="text"
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleChange}
-                className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-              />
-            </div>
-
-            {/* Email */}
-            <div>
-              <label className="block text-sm font-medium mb-2 text-slate-300">
-                Email Address
-              </label>
-              <input
-                type="email"
-                disabled
-                readOnly
-                name="email"
-                value={formData.email}
-                className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-              />
-            </div>
-
-            {/* Phone */}
-            <div>
-              <label className="block text-sm font-medium mb-2 text-slate-300">
-                Phone
-              </label>
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-              />
-            </div>
-
-            {/* Bio */}
-            <div>
-              <label className="block text-sm font-medium mb-2 text-slate-300">
-                Bio
-              </label>
-              <textarea
-                name="bio"
-                value={formData.bio}
-                onChange={handleChange}
-                rows={3}
-                className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent resize-none"
-              />
-            </div>
-          </form>
+    <div className="max-w-4xl mx-auto">
+      <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700">
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-2xl font-bold">Personal Information</h2>
+          <button
+            onClick={handleSubmit}
+            disabled={updateMutation.isPending}
+            className="flex items-center gap-2 bg-cyan-500 hover:bg-cyan-600 disabled:opacity-70 text-white px-6 py-3 rounded-lg transition font-medium"
+          >
+            <Edit className="w-4 h-4" />
+            {updateMutation.isPending ? "Saving..." : "Save Changes"}
+          </button>
         </div>
 
-        
+        <form className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium mb-2 text-slate-300">Full Name</label>
+            <input
+              type="text"
+              name="fullName"
+              value={formData.fullName}
+              onChange={handleChange}
+              className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              placeholder="Enter your name"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2 text-slate-300">Email Address</label>
+            <input
+              type="email"
+              value={formData.email}
+              disabled
+              className="w-full bg-slate-700/30 border border-slate-600 rounded-lg px-4 py-3 text-slate-400 cursor-not-allowed"
+            />
+            <p className="text-xs text-slate-500 mt-1">Email cannot be changed</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2 text-slate-300">Phone</label>
+            <input
+              type="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              placeholder="+8801XXXXXXXXX"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2 text-slate-300">Bio</label>
+            <textarea
+              name="bio"
+              value={formData.bio}
+              onChange={handleChange}
+              rows={4}
+              className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 resize-none"
+              placeholder="Tell us about yourself..."
+            />
+          </div>
+        </form>
       </div>
     </div>
   );
 }
-
-export default ProfilePage;
