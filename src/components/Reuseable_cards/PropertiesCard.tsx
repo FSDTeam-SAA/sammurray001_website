@@ -256,7 +256,7 @@ interface ListingCardProps {
 }
 
 export default function ListingCard({ listing, isSubscriber }: ListingCardProps) {
-  console.log(listing)
+  // console.log(listing)
   const [isWishlisted, setIsWishlisted] = useState(false);
   const router = useRouter();
   const { data: session } = useSession();

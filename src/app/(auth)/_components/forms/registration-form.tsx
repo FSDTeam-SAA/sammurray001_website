@@ -50,7 +50,7 @@ export default function RegistrationForm({ onSubmit, onLoginClick }: Registratio
     },
 
     onSuccess: (data) => {
-      console.log("Registration Success:", data);
+      // console.log("Registration Success:", data);
       if (selectedRole === "TENANT" || selectedRole === "SUPPLIER") {
         onSubmit(selectedRole);
       }
