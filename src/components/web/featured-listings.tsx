@@ -23,6 +23,7 @@ interface userprops {
 export default function FeaturedListings() {
   const  session  = useSession();
   const { user } = useApp();
+  console.log(user)
   const token = session?.data?.user?.accessToken || "";
 
   const { data: response, isLoading, isError } = useQuery<any>({

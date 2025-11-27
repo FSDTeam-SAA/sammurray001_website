@@ -18,7 +18,7 @@ export default function SupplierStepTwoForm({
 }: SupplierStepTwoFormProps) {
   const [licenseFile, setLicenseFile] = useState<File | null>(null)
   const [logoFile, setLogoFile] = useState<File | null>(null)
-  console.log(logoFile)
+  // console.log(logoFile)
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
 
   const handleLicenseChange = (e: React.ChangeEvent<HTMLInputElement>) => {

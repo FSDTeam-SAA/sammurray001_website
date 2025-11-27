@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 
 interface Props {
-  formattedPrice: number | undefined;
+  formattedPrice: string | undefined;
   id: string | string[];
 }
 
