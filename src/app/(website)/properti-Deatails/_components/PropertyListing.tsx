@@ -1,3 +1,5 @@
+
+
 "use client";
 
 import { useSession } from "next-auth/react";
@@ -8,8 +10,11 @@ import Image from "next/image";
 import ContactForm from "../_components/contact-form";
 import PropertySkeleton from "./PropertySkeleton";
 import { useApp } from "@/lib/AppContext";
-
-
+import { useState } from "react";
+import Lightbox from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/styles.css";
+import "yet-another-react-lightbox/plugins/thumbnails.css";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface ListingData {
   _id: string;
@@ -21,23 +26,97 @@ interface ListingData {
   description?: string;
   city: string;
   country: string;
-  thumble: string;
+  thumble: string[]; // Now always an array
   user?: {
     fullName: string;
     profileImage?: string;
     email?: string;
+    phone?: string;
   };
 }
 
+// Image Gallery Component
+function PropertyGallery({ images, title }: { images: string[]; title: string }) {
+  const [mainIndex, setMainIndex] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
+  const thumbnails = images.slice(0, 10);
+  const slides = images.map((src) => ({ src }));
+
+  return (
+    <>
+      {/* Main Hero Image */}
+      <div
+        className="relative w-full overflow-hidden rounded-3xl mb-6 cursor-pointer group"
+        onClick={() => setLightboxOpen(true)}
+      >
+        <Image
+          src={images[mainIndex] || "/assets/card1.png"}
+          alt={title}
+          width={1200}
+          height={800}
+          className="w-full h-56 sm:h-72 md:h-96 lg:h-[500px] object-cover transition-all duration-500 group-hover:scale-105"
+          priority
+        />
+        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+          <p className="text-white font-semibold bg-black/70 px-6 py-3 rounded-lg text-lg">
+            View Gallery ({images.length} photos)
+          </p>
+        </div>
+      </div>
+
+      {/* Thumbnails - Max 10 */}
+      {thumbnails.length > 1 && (
+        <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-gray-600">
+          {thumbnails.map((img, idx) => (
+            <button
+              key={idx}
+              onClick={(e) => {
+                e.stopPropagation();
+                setMainIndex(idx);
+              }}
+              className={`flex-shrink-0 rounded-xl overflow-hidden border-4 transition-all ${
+                mainIndex === idx ? "border-orange-500 shadow-2xl" : "border-transparent"
+              }`}
+            >
+              <Image
+                src={img}
+                alt={`Thumbnail ${idx + 1}`}
+                width={120}
+                height={120}
+                className="w-24 h-24 object-cover hover:opacity-90 transition"
+              />
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Fullscreen Lightbox */}
+      <Lightbox
+        open={lightboxOpen}
+        close={() => setLightboxOpen(false)}
+        index={mainIndex}
+        slides={slides}
+        on={{ view: ({ index }) => setMainIndex(index) }}
+        render={{
+          buttonPrev: images.length <= 1 ? () => null : undefined,
+          buttonNext: images.length <= 1 ? () => null : undefined,
+          iconPrev: () => <ChevronLeft className="w-10 h-10" />,
+          iconNext: () => <ChevronRight className="w-10 h-10" />,
+        }}
+        labels={{ Close: "Close" }}
+        controller={{ closeOnBackdropClick: true }}
+      />
+    </>
+  );
+}
 
 // Main Component
 export default function PropertyListing() {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const { data: session } = useSession();
   const token = session?.user?.accessToken || null;
- const { user } = useApp();
- console.log(user)
+  const { user } = useApp();
 
   const fetchListing = async (): Promise<ListingData> => {
     const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/property/${id}`, {
@@ -53,14 +132,11 @@ export default function PropertyListing() {
   const { data: listing, isLoading, isError } = useQuery<ListingData>({
     queryKey: ["listing", id, token],
     queryFn: fetchListing,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
   });
-  const formattedPrice = listing?.price
 
-  // Show Skeleton while loading
- if (isLoading) return <PropertySkeleton />;
-
-  // Show error state
+  // Loading & Error States
+  if (isLoading) return <PropertySkeleton />;
   if (isError || !listing) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -69,76 +145,64 @@ export default function PropertyListing() {
     );
   }
 
-    const showMessageButton =
-    (user?.activeInactiveSubcrib === "active" && user.isSubscription) ||
-    (user?.activeInactiveSubcrib === "inactive" && !user.isSubscription);
-  // Main Rendered UI
+  // Fix: thumble is always an array now
+  const images = Array.isArray(listing.thumble)
+    ? listing.thumble
+    : [listing.thumble || "/assets/card1.png"];
+
+  // Fix: formattedPrice was undefined
+  const formattedPrice = listing.price.toLocaleString();
+
+  // Fix: showMessageButton logic (based on your user subscription)
+  const showMessageButton =
+    (user?.activeInactiveSubcrib === "active" && user?.isSubscription) ||
+    (user?.activeInactiveSubcrib === "inactive" && !user?.isSubscription);
 
   return (
-    <div className="min-h-screen container mx-auto py-[24px]">
-      {/* Hero Image */}
-      <div className="w-full overflow-hidden rounded-3xl mb-8">
-        <Image
-          src={listing?.thumble|| "/assets/card1.png"}
-          alt={listing.title}
-          width={1000}
-          height={1000}
-          className="w-full h-56 sm:h-72 md:h-96 lg:h-[400px] object-cover"
-          priority
-        />
-      </div>
+    <div className="min-h-screen container mx-auto py-8 px-4">
+      {/* Image Gallery */}
+      <PropertyGallery images={images} title={listing.title} />
 
-      <div className="px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <div className="max-w-7xl mx-auto py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column */}
+          {/* Left Column - Details */}
           <div className="lg:col-span-2 space-y-8">
             {/* Title & Location */}
-            <div className="mb-8">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3">
+            <div>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
                 {listing.title}
               </h1>
-              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-                <div className="flex items-center gap-2 text-[#BFBFBF] text-sm sm:text-base">
-                  <MapPin size={18} />
-                  <span>{listing.city}, {listing.country}</span>
-                </div>
-
-                {/* <button
-                  onClick={() => setIsWishlisted(!isWishlisted)}
-                  className="bg-[#E57525] hover:bg-[#E57525]/90 text-white font-semibold h-11 px-6 rounded-lg transition-all duration-200 text-sm sm:text-base"
-                >
-                  {isWishlisted ? "Wishlisted" : "+ Add To Wishlist"}
-                </button> */}
+              <div className="flex items-center gap-2 text-gray-400">
+                <MapPin size={20} />
+                <span>{listing.city}, {listing.country}</span>
               </div>
             </div>
 
-            {/* Property Details */}
-            <div className="p-6 sm:p-8 rounded-xl bg-[#111827]/50">
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
+            {/* Price & Details */}
+            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                 <div>
-                  <p className="text-[#BFBFBF] text-sm mb-1">Type</p>
-                  <p className="text-white text-lg font-semibold">{listing.type?.name || "N/A"}</p>
+                  <p className="text-gray-400 text-sm">Type</p>
+                  <p className="text-white text-xl font-bold">{listing.type?.name || "N/A"}</p>
                 </div>
                 {listing.size && (
                   <div>
-                    <p className="text-[#BFBFBF] text-sm mb-1">Size</p>
-                    <p className="text-white text-lg font-semibold">{listing.size}</p>
+                    <p className="text-gray-400 text-sm">Size</p>
+                    <p className="text-white text-xl font-bold">{listing.size}</p>
                   </div>
                 )}
                 <div>
-                  <p className="text-[#BFBFBF] text-sm mb-1">Price</p>
-                  <p className="text-white text-lg font-semibold">
-                    ${listing.price.toLocaleString()}
-                  </p>
+                  <p className="text-gray-400 text-sm">Price</p>
+                  <p className="text-white text-2xl font-bold">${formattedPrice}</p>
                 </div>
               </div>
             </div>
 
             {/* Description */}
             {listing.description && (
-              <div className="p-6 sm:p-8 rounded-xl bg-[#111827]/50">
-                <h2 className="text-2xl font-semibold text-white mb-5">About This Property</h2>
-                <p className="text-[#BFBFBF] text-base leading-relaxed whitespace-pre-wrap">
+              <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
+                <h2 className="text-2xl font-bold text-white mb-6">About This Property</h2>
+                <p className="text-gray-300 text-lg leading-relaxed whitespace-pre-wrap">
                   {listing.description}
                 </p>
               </div>
@@ -147,45 +211,72 @@ export default function PropertyListing() {
 
           {/* Right Column */}
           <div className="space-y-6">
-            {/* Contact Form - Only for subscribed users */}
+            {/* Contact Form - Only for eligible users */}
             {showMessageButton && <ContactForm formattedPrice={formattedPrice} id={id} />}
 
             {/* Agent Card */}
-            <div className="bg-white/10 backdrop-blur-sm p-6 sm:p-8 rounded-xl border border-white/5">
-              <h3 className="text-white text-lg font-bold mb-6">Contact Information</h3>
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
+              <h3 className="text-white text-xl font-bold mb-6">Contact Agent</h3>
 
               <div className="flex items-center gap-4 mb-6">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#FF6B35] to-[#E55A24] flex items-center justify-center shadow-lg">
-                  <span className="text-white font-bold text-xl">
-                    {listing.user?.fullName?.charAt(0).toUpperCase() || "A"}
-                  </span>
+                <div className="w-16 h-16 rounded-full overflow-hidden ring-4 ring-orange-500/30">
+                  <Image
+                    src={listing.user?.profileImage || `https://ui-avatars.com/api/?name=${listing.user?.fullName || "Agent"}&background=FF6B35&color=fff`}
+                    alt={listing.user?.fullName || "Agent"}
+                    width={64}
+                    height={64}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <div>
-                  <h4 className="text-white font-semibold text-base sm:text-lg">
+                  <h4 className="text-white text-lg font-bold">
                     {listing.user?.fullName || "Property Agent"}
                   </h4>
-                  <p className="text-[#BFBFBF] text-sm">Licensed Agent</p>
+                  <p className="text-gray-400">Licensed Real Estate Agent</p>
                 </div>
               </div>
 
-              <div className="space-y-4 text-sm sm:text-base">
+              <div className="space-y-4 text-gray-300">
                 {listing.user?.email && (
-                  <a href={`mailto:${listing.user.email}`} className="flex items-center gap-3 text-gray-300 hover:text-white transition">
-                    <Mail size={18} />
+                  <a href={`mailto:${listing.user.email}`} className="flex items-center gap-3 hover:text-white transition">
+                    <Mail size={20} />
                     {listing.user.email}
                   </a>
                 )}
-                <div className="flex items-center gap-3 text-gray-300">
-                  <Phone size={18} />
-                  (509) 555-0103
-                </div>
+                {listing.user?.phone ? (
+                  <div className="flex items-center gap-3">
+                    <Phone size={20} />
+                    {listing.user.phone}
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3 text-gray-500">
+                    <Phone size={20} />
+                    Phone not available
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Custom Scrollbar Style */}
+      <style jsx global>{`
+        .scrollbar-thin::-webkit-scrollbar {
+          height: 8px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-track {
+          background: #1f2937;
+          border-radius: 4px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+          background: #6b7280;
+          border-radius: 4px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+          background: #9ca3af;
+        }
+      `}</style>
     </div>
   );
 }
-
-
